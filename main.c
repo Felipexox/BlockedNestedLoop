@@ -32,19 +32,19 @@ int main()
 
    /// int pageS = blockingFactor(tPagina * MEGA, sizeof(struct Tupla));
 
-    struct Buffer* externo;
+    struct Buffer* externo = (struct Buffer*)malloc(sizeof(struct Buffer));
     printf("\nCreating buffer externo\n");
     createBuffer(externo, sizeExterno, tPagina);
 
     printf("\n Init buffer externo\n");
     initBuffer(externo, sizeExterno, tPagina);
 
-   // printf("\n Print buffer externo\n");
-    //printRegister(externo, 20, 1);
+    printf("\n Print buffer externo\n");
+    printRegister(externo, 20, 1);
 
-    struct Buffer* interno;
+   // struct Buffer* interno;
 
-    createBuffer(interno, sizeInterno, tPagina);
+    //createBuffer(interno, sizeInterno, tPagina);
 
 
 

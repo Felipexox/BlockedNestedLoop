@@ -5,16 +5,17 @@
 #define KILOBYTE 1024
 
 void createBuffer(struct Buffer* buffer, int bufferSize, int tPagina){
-    buffer = (struct Buffer*)malloc(sizeof(struct Buffer));
+    int i = 0;
     buffer->paginas = (struct Pagina*)malloc(bufferSize * sizeof(struct Pagina));
 
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla));
 
-    int i = 0;
+    printf("\n %d \n", tFactor);
 
     for(i = 0; i < bufferSize; i++){
-         buffer->paginas[i].tuplas = (struct Tupla*)malloc(tFactor * sizeof(struct Tupla));
+         buffer->paginas[i].tuplas = (struct Tupla*)malloc(tFactor);
     }
+
 };
 
 void initBuffer(struct Buffer* buffer, int bufferSize, int tPagina){
@@ -23,22 +24,25 @@ void initBuffer(struct Buffer* buffer, int bufferSize, int tPagina){
     int j = 0;
     int id = 0;
     for(i = 0; i < bufferSize; i++){
-         for(j = 0; j < tFactor; j++){
+         for(j = 0; j < tFactor / sizeof(struct Tupla); j++){
 
             buffer->paginas[i].tuplas[j].id = id;
+
+           // printf("%d ,", buffer->paginas[i].tuplas[j].id);
            // buffer->paginas[i].tuplas[j].cpf = 'cpf';
            // buffer->paginas[i].tuplas[j].nome = 'nome';
             id++;
          }
+         printf("\n");
     }
 }
 void printRegister(struct Buffer* buffer, int registerSize, int tPagina){
     int i = 0;
     int j = 0;
     int id = 0;
-    printf("Registros pagina %d",tPagina);
+    printf("Registros pagina %d\n", tPagina);
     for(j = 0; j < registerSize; j++){
-        printf( "%d %s %s", buffer->paginas[tPagina].tuplas[j].id);
+        printf( "%d \n", buffer->paginas[tPagina].tuplas[j].id);
     //           buffer->paginas[tPagina].tuplas[j].cpf,
      //          buffer->paginas[tPagina].tuplas[j].nome);
     }

@@ -4,10 +4,12 @@ struct Tupla{
 
 struct Pagina{
     struct Tupla* tuplas;
+    int t;
 };
 
 struct Buffer{
     struct Pagina* paginas;
+    int t;
 };
 
 
