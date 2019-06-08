@@ -4,3 +4,15 @@
 
 1560018034 c:\users\felipe\documents\projetos\git-projects\trabalho2bd\nestedloopblocado\headers\bufferutility.h
 
+1560032507 source:c:\users\felipe\documents\projetos\git-projects\trabalho2bd\blockednestedloop\headers\bufferutility.c
+	"BufferUtility.h"
+	<math.h>
+	<stdlib.h>
+
+1560031266 c:\users\felipe\documents\projetos\git-projects\trabalho2bd\blockednestedloop\headers\bufferutility.h
+
+1560032538 source:c:\users\felipe\documents\projetos\git-projects\trabalho2bd\blockednestedloop\main.c
+	<stdio.h>
+	<stdlib.h>
+	"headers/BufferUtility.h"
+

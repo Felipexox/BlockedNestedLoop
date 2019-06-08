@@ -1,22 +1,27 @@
 struct Tupla{
     int id;
-    char nome[40];
-    char cpf[11];
 };
 
 struct Pagina{
-    struct Tupla tuplas[3];
+    struct Tupla* tuplas;
 };
 
 struct Buffer{
     struct Pagina* paginas;
 };
 
+
 /// Inicia o buffer
-void createBuffer();
+void createBuffer(struct Buffer* buffer, int bufferSize, int tPagina);
+
+void initBuffer(struct Buffer* buffer, int bufferSize, int tPagina);
+
+void printRegister(struct Buffer* buffer, int registerSize, int tPagina);
 
 /// Le todas as tuplas dentro do root do projeto
 struct Tupla* readTuplas(char* fileName);
+
+int amountPages(int bufferSize, int pagesSize);
 
 /// conta o total de registro dentro do arquivo
 int countRegisters(char* fileName);
@@ -28,10 +33,10 @@ struct Pagina* createPages(struct Tupla* tuplas, int regAmount);
 int bufferSize(struct Buffer* buffer);
 
 /// Calcula o tamanho da pagina
-int pageSize(struct Pagina* page);
+int pageSize(int blockingFactor);
 
 /// Calcula o fator de pagina do buffer
-int pageFactor(int bufferSize, int pageSize);
+int bufferPageFactor(int bufferSize, int pageSize);
 
 /// Calcula o fator de blocagem
 int blockingFactor(int pageSize, int regSize);
