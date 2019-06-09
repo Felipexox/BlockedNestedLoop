@@ -7,8 +7,15 @@ int main()
 
     int tPagina = 2;
 
-    char* file1 = 'file1.csv';
-    char* file2 = 'file2.csv';
+    char* fileName1 = 'file1.csv';
+    int file1Size = fileSize(fopen(fileName1, "r"));
+
+    char* fileName2 = 'file2.csv';
+    int file2Size = fileSize(fopen(fileName2, "r"));
+
+    FILE* file1 = fopen(fileName1, "r");
+
+    FILE* file2 = fopen(fileName2, "r");
 
     struct Tupla* tuplas1 = readTuplas(file1);
 
@@ -29,7 +36,6 @@ int main()
 
     int sizeExterno = 3;
 
-
    /// int pageS = blockingFactor(tPagina * MEGA, sizeof(struct Tupla));
 
     struct Buffer* externo = (struct Buffer*)malloc(sizeof(struct Buffer));
@@ -40,11 +46,31 @@ int main()
     initBuffer(externo, sizeExterno, tPagina);
 
     printf("\n Print buffer externo\n");
-    printRegister(externo, 20, 1);
+    printRegister(externo, 20, 2);
 
-   // struct Buffer* interno;
 
-    //createBuffer(interno, sizeInterno, tPagina);
+    struct Buffer* interno =  (struct Buffer*)malloc(sizeof(struct Buffer));
+
+    printf("\nCreating buffer interno\n");
+    createBuffer(interno, sizeInterno, tPagina);
+
+    printf("\n Init buffer interno\n");
+    initBuffer(interno, sizeInterno, tPagina);
+
+    printf("\n Print buffer interno\n");
+    printRegister(interno, 20, 1);
+    int tFactor = blockingFactor(tPagina, sizeof(struct Tupla));
+    int i = 0;
+    int j = 0;
+    for(i = 0; i < file1Size; i+= tFactor){
+        initBuffer(externo, file1, i, file1Size, sizeExterno, tPagina);
+        for(j = 0; j < file2Size; j+= tFactor){
+            initBuffer(interno, file2, j, file2Size, sizeInterno, tPagina);
+            join(externo, interno, sizeExterno, sizeInterno, tPagina);
+        }
+        clearBuffer(externo, sizeExterno);
+        clearBuffer(interno, sizeInterno);
+    }
 
 
 

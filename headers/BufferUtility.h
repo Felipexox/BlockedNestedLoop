@@ -4,7 +4,7 @@ struct Tupla{
 
 struct Pagina{
     struct Tupla* tuplas;
-    int t;
+    size_t sizeTuplas;
 };
 
 struct Buffer{
