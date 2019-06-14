@@ -3,23 +3,24 @@
 #include "headers/BufferUtility.h"
 int main()
 {
-    int tamBuffer = 24;
+    int tamBuffer = 10;
 
     int tPagina = 2;
 
-    char* fileName1 = 'file1.csv';
-    int file1Size = fileSize(fopen(fileName1, "r"));
+    // char* fileName1 = 'file1.txt';
+    FILE* f1 = fopen("file1.txt", "r");
+    int file1Size = fileSize(f1);
+    FILE* f2 = fopen("file2.txt", "r");
+    // char* fileName2 = 'file2.txt';
+    int file2Size = fileSize(f2);
 
-    char* fileName2 = 'file2.csv';
-    int file2Size = fileSize(fopen(fileName2, "r"));
+    FILE* file1 = fopen("file1.txt", "r");
 
-    FILE* file1 = fopen(fileName1, "r");
+    FILE* file2 = fopen("file2.txt", "r");
 
-    FILE* file2 = fopen(fileName2, "r");
+    // struct Tupla* tuplas1 = readTuplas(file1); isso dava erro pq readTuplas nao ta definida
 
-    struct Tupla* tuplas1 = readTuplas(file1);
-
-    struct Tupla* tuplas2 = readTuplas(file2);
+    // struct Tupla* tuplas2 = readTuplas(file2);
 
 
 
@@ -42,11 +43,11 @@ int main()
     printf("\nCreating buffer externo\n");
     createBuffer(externo, sizeExterno, tPagina);
 
-    printf("\n Init buffer externo\n");
-    initBuffer(externo, sizeExterno, tPagina);
+    // printf("\n Init buffer externo\n");
+    // initBuffer(externo, sizeExterno, tPagina); # faltam argumentos aqui
 
-    printf("\n Print buffer externo\n");
-    printRegister(externo, 20, 2);
+    // printf("\n Print buffer externo\n");
+    // printRegister(externo, 20, 2);
 
 
     struct Buffer* interno =  (struct Buffer*)malloc(sizeof(struct Buffer));
@@ -54,11 +55,11 @@ int main()
     printf("\nCreating buffer interno\n");
     createBuffer(interno, sizeInterno, tPagina);
 
-    printf("\n Init buffer interno\n");
-    initBuffer(interno, sizeInterno, tPagina);
+    // printf("\n Init buffer interno\n");
+    // initBuffer(interno, sizeInterno, tPagina);
 
-    printf("\n Print buffer interno\n");
-    printRegister(interno, 20, 1);
+    // printf("\n Print buffer interno\n");
+    // printRegister(interno, 20, 1);
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla));
     int i = 0;
     int j = 0;
