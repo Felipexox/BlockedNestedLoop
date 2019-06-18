@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #define KILOBYTE 1024
 
 struct Tupla{
@@ -36,7 +37,7 @@ struct Pagina* createPages(struct Tupla* tuplas, int regAmount);
 
 void clearBuffer (struct Buffer* buffer, int pBufferSize);
 
-void readBlocking(struct Tupla* bloco, FILE* file, int sizeToRead, int bufferSize);
+void readBlocking(struct Tupla* bloco, FILE* file, int sizeToRead);
 
 /// Calcula o tamnho do registro
 int bufferSize(struct Buffer* buffer);
@@ -60,8 +61,8 @@ int main()
 
     char* fileName1 = "file1.txt";
     printf("write file 1");
-    writeData(fileName1, 50);
-    printFileContent(fileName1, 15);
+  //  writeData(fileName1, 10000000);
+//    printFileContent(fileName1, 8);
     int file1Size = fileSize(fopen(fileName1, "r"));
     printf("\n File 1 Size: %d bytes", &file1Size);
     printf("\n\nWrited file 1");
@@ -70,9 +71,9 @@ int main()
 
     char* fileName2 = "file2.txt";
     printf("\nWrite file 2");
-    writeData(fileName2, 50);
+//    writeData(fileName2, 10000000);
     int file2Size = fileSize(fopen(fileName2, "r"));
-    printFileContent(fileName2, 7);
+//    printFileContent(fileName2, 7);
 
     printf("\n File 2 Size: %d bytes", &file2Size);
     printf("\n\nWrited file 2");
@@ -122,14 +123,17 @@ int main()
 //        clearBuffer(externo, sizeExterno);
 //        clearBuffer(interno, sizeInterno);
 //    }
+    initBuffer(externo, file1, i, file1Size, sizeExterno, tPagina);
+    initBuffer(interno, file2, j, file2Size, sizeInterno, tPagina);
     for(i = 0; i < externo; i++){
-        initBuffer(externo, file1, i, file1Size, sizeExterno, tPagina);
+
         for(j = 0; j < interno; j++){
-            initBuffer(interno, file2, j, file2Size, sizeInterno, tPagina);
-            join(externo, interno, sizeExterno, sizeInterno, tPagina);
+            join(externo, interno, i, j, tPagina);
+            printf("\n\nFinish join\n\n");
         }
-        clearBuffer(externo, sizeExterno);
-        clearBuffer(interno, sizeInterno);
+        printf("Clear Buffers");
+
+
     }
 
 
@@ -145,9 +149,9 @@ void createBuffer(struct Buffer* buffer, int bufferSize, int tPagina){
 
     printf("\n %d \n", tFactor);
 
-//    for(i = 0; i < bufferSize; i++){
-//         buffer->paginas[i].tuplas = (struct Tupla*)malloc(tFactor);
-//    }
+    for(i = 0; i < bufferSize; i++){
+         buffer->paginas[i].tuplas = (struct Tupla*)malloc(tFactor);
+    }
 
 }
 
@@ -155,7 +159,7 @@ void initBuffer(struct Buffer* buffer, FILE* file, int posiInit, int fileSize, i
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla));
 
     int i = 0;
-    fseek(file, 0, posiInit * tFactor);
+    //fseek(file, 0, posiInit * tFactor);
 
     int currentPosi = ftell(file);
     printf("\nCurrent Cursor Position in file: %d\n", &currentPosi);
@@ -166,13 +170,13 @@ void initBuffer(struct Buffer* buffer, FILE* file, int posiInit, int fileSize, i
 //    }
     printf("\nDelta: %d\n", &delta);
     for(i = 0; i < bufferSize; i++){
-        readBlocking(buffer->paginas[i].tuplas, file, tFactor - delta, bufferSize);
+        readBlocking(buffer->paginas[i].tuplas, file, tFactor - delta);
         printf("\nReading blocking file\n");
          int k = 0;
         printf("\n Reading file");
-        for(k = 0; k < tFactor; k++){
-            printf("\n %d", buffer->paginas[i].tuplas[k].id);
-        }
+//        for(k = 0; k < tFactor; k++){
+//            printf("\n %d", buffer->paginas[i].tuplas[k].id);
+//        }
         printf("\n Finish register");
     }
 }
@@ -183,21 +187,32 @@ void join(struct Buffer* buffer1, struct Buffer* buffer2, int tCurrentBufferPage
 
     int i = 0;
     int j = 0;
-
+    printf("\nJoin Tuplas");
     for(i = 0; i < tFactor / sizeof(struct Tupla); i++){
         for(j = 0; j < tFactor / sizeof(struct Tupla); j++){
+            //printf("\n%d",buffer1->paginas[tCurrentBufferPage1].tuplas[i].id);
             if(buffer1->paginas[tCurrentBufferPage1].tuplas[i].id == buffer2->paginas[tCurrentBufferPage2].tuplas[j].id){
-                printf("%d %d", buffer1->paginas[tCurrentBufferPage1].tuplas[i].id, buffer1->paginas[tCurrentBufferPage2].tuplas[j].id);
+                printf("\n Match: %d %d", buffer1->paginas[tCurrentBufferPage1].tuplas[i].id, buffer1->paginas[tCurrentBufferPage2].tuplas[j].id);
             }
         }
     }
 
 }
 
-void readBlocking(struct Tupla* bloco, FILE* file, int sizeToRead, int bufferSize){
+void readBlocking(struct Tupla* bloco, FILE* file, int sizeToRead){
 
-    fread(&bloco, sizeof(struct Tupla), sizeToRead / sizeof(struct Tupla), file);
+//    fread(&bloco, sizeof(struct Tupla), sizeToRead / sizeof(struct Tupla), file);
+    printf("\n Size To Read: %d", sizeToRead);
 
+
+    int i = 0;
+
+    for ( i = 0; i < sizeToRead/sizeof(struct Tupla); i++){
+        if(fscanf(file, "%d", &bloco[i].id) == EOF){
+            break;
+        }
+       // printf("\n%d", bloco[i].id);
+    }
 }
 
 void clearBuffer (struct Buffer* buffer, int pBufferSize){
@@ -246,16 +261,20 @@ int bufferPageFactor(int bufferSize, int pageSize){
 }
 
 int blockingFactor(int pageSize, int regSize){
-    return ceil(((pageSize * KILOBYTE * KILOBYTE)/regSize));
+    return ceil(((pageSize *  KILOBYTE)/regSize));
 }
 
 void printFileContent(char* fileName, int pAmount){
     FILE* file = fopen(fileName, "r");
     struct Tupla * tuplas = malloc(sizeof(struct Tupla) * pAmount);
+    int i =0;
+    int id = 0;
+   // fread(&tuplas,  sizeof(struct Tupla), pAmount, file);
+    while(fscanf(file, "%d", &tuplas[i].id) != EOF){
+         printf("\n %d", tuplas[i].id);
+          i++;
+      }
 
-    fread(&tuplas,  sizeof(struct Tupla), (int)(pAmount / sizeof(struct Tupla)), file);
-
-    int i = 0;
     printf("\n Reading file %s", fileName);
     for(i = 0; i < pAmount; i++){
         printf("\n %d", tuplas[i].id);
@@ -271,9 +290,11 @@ void writeData(char* filename, int amountTupla){
 
     int i = 0;
     for(i = 0; i < amountTupla; i++){
-        tuplas[i].id = i;
+
+        fprintf(file,"%d\n",i);
     }
-    fwrite(&tuplas,  sizeof(struct Tupla), amountTupla, file);
+    printf("fasdoifjas");
+
     fclose(file);
 }
 
