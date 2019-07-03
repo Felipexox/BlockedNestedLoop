@@ -39,13 +39,13 @@ struct Buffer2{
 /// Inicia o buffer
 void createBuffer(struct Buffer1* buffer, int bufferSize, int tPagina);
 
-void initBuffer(struct Buffer1* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina);
+int initBuffer(struct Buffer1* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina);
 
 void printRegister(struct Buffer1* buffer, int registerSize, int tPagina);
 
 void createBuffer2(struct Buffer2* buffer, int bufferSize, int tPagina);
 
-void initBuffer2(struct Buffer2* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina);
+int initBuffer2(struct Buffer2* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina);
 
 void printRegister2(struct Buffer2* buffer, int registerSize, int tPagina);
 
@@ -68,9 +68,9 @@ void clearBuffer (struct Buffer1* buffer, int pBufferSize);
 
 void clearBuffer2 (struct Buffer2* buffer, int pBufferSize);
 
-void readBlocking(struct Tupla1* bloco, FILE* file, int sizeToRead);
+int readBlocking(struct Tupla1* bloco, FILE* file, int sizeToRead);
 
-void readBlocking2(struct Tupla2* bloco, FILE* file, int sizeToRead);
+int readBlocking2(struct Tupla2* bloco, FILE* file, int sizeToRead);
 
 
 /// Calcula o tamanho da pagina
@@ -127,9 +127,9 @@ int main()
 
    // int bufferPageFac = bufferPageFactor(tamBuffer, tPagina);
 
-    int qtdInterno = 2;
+    int qtdInterno = 10;
 
-    int qtdExterno = 3;
+    int qtdExterno = 4;
 
    /// int pageS = blockingFactor(tPagina * MEGA, sizeof(struct Tupla1));
 
@@ -149,26 +149,29 @@ int main()
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla1));
     int i = 0;
     int j = 0;
-//    for(i = 0; i < file1Size; i+= tFactor){
-//        initBuffer(externo, file1, i, file1Size, sizeExterno, tPagina);
-//        for(j = 0; j < file2Size; j+= tFactor){
-//            initBuffer(interno, file2, j, file2Size, sizeInterno, tPagina);
-//            join(externo, interno, sizeExterno, sizeInterno, tPagina);
-//        }
-//        clearBuffer(externo, sizeExterno);
-//        clearBuffer(interno, sizeInterno);
-//    }
-    initBuffer(externo, file1, i, file1Size, qtdExterno, tPagina);
-    initBuffer2(interno, file2, j, file2Size, qtdInterno, tPagina);
-    for(i = 0; i < qtdExterno; i++){
 
-        for(j = 0; j < qtdInterno; j++){
-            join(externo, interno, i, j, tPagina);
-            printf("\n\nFinish join\n\n");
+    int stateBuffer = 0;
+    int stateBuffer2 = 0;
+    while(stateBuffer == 0){
+
+        stateBuffer = initBuffer(externo, file1, i, file1Size, qtdExterno, tPagina);
+
+        for(i = 0; i < qtdExterno; i++){
+            while(stateBuffer2 == 0){
+
+                stateBuffer2 = initBuffer2(interno, file2, j, file2Size, qtdInterno, tPagina);
+                for(j = 0; j < qtdInterno; j++){
+
+                    join(externo, interno, i, j, tPagina);
+    //                printf("\n\nFinish join\n\n");
+                }
+            }
+            fseek(file2, 0, 0);
+            stateBuffer2 = 0;
         }
-        printf("Clear Buffers");
 
-
+//        clearBuffer(externo, qtdExterno);
+//        clearBuffer2(interno, qtdInterno);
     }
 
 
@@ -204,56 +207,59 @@ void createBuffer2(struct Buffer2* buffer, int bufferSize, int tPagina){
 
 }
 
-void initBuffer(struct Buffer1* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina){
+int initBuffer(struct Buffer1* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina){
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla1));
 
     int i = 0;
-    //fseek(file, 0, posiInit * tFactor);
+   // fseek(file, 0, posiInit * tFactor);
 
     int currentPosi = ftell(file);
-    printf("\nCurrent Cursor Position in file: %d\n", &currentPosi);
-    printf("\ntFactor: %d\n", tFactor);
+//    printf("\nCurrent Cursor Position in file: %d\n", &currentPosi);
+//    printf("\ntFactor: %d\n", tFactor);
     int delta = 0;
-//    if(tFactor + currentPosi > fileSize){
-//        delta = (tFactor + currentPosi) - fileSize;
-//    }
-    printf("\nDelta: %d\n", &delta);
+
+//    printf("\nDelta: %d\n", &delta);
     for(i = 0; i < bufferSize; i++){
-        readBlocking(buffer->paginas[i].tuplas, file, tFactor - delta);
-        printf("\nReading blocking file\n");
-         int k = 0;
-        printf("\n Reading file");
-//        for(k = 0; k < tFactor; k++){
-//            printf("\n %d", buffer->paginas[i].tuplas[k].id);
-//        }
-        printf("\n Finish register");
+        int fileState = readBlocking(buffer->paginas[i].tuplas, file, tFactor - delta);
+        if(fileState < 0){
+            return -1;
+        }
+//        printf("\nReading blocking file\n");
+//        printf("\n Finish register");
     }
+    return 0;
 }
 
-void initBuffer2(struct Buffer2* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina){
+int initBuffer2(struct Buffer2* buffer, FILE* file, int posiInit, int fileSize, int bufferSize, int tPagina){
     int tFactor = blockingFactor(tPagina, sizeof(struct Tupla2));
 
     int i = 0;
     //fseek(file, 0, posiInit * tFactor);
 
     int currentPosi = ftell(file);
-    printf("\nCurrent Cursor Position in file: %d\n", &currentPosi);
-    printf("\ntFactor: %d\n", tFactor);
+//    printf("\nCurrent Cursor Position in file: %d\n", currentPosi);
+//    printf("\ntFactor: %d\n", tFactor);
     int delta = 0;
 //    if(tFactor + currentPosi > fileSize){
+
 //        delta = (tFactor + currentPosi) - fileSize;
 //    }
-    printf("\nDelta: %d\n", &delta);
+//    printf("\nDelta: %d\n", &delta);
     for(i = 0; i < bufferSize; i++){
-        readBlocking2(buffer->paginas[i].tuplas, file, tFactor - delta);
-        printf("\nReading blocking file\n");
-         int k = 0;
-        printf("\n Reading file");
+        int stateBuffer = readBlocking2(buffer->paginas[i].tuplas, file, tFactor - delta);
+        if(stateBuffer < 0){
+            return -1;
+        }
+
+//        printf("\nReading blocking file\n");
+//         int k = 0;
+//        printf("\n Reading file");
 //        for(k = 0; k < tFactor; k++){
 //            printf("\n %d", buffer->paginas[i].tuplas[k].id);
 //        }
-        printf("\n Finish register");
+//        printf("\n Finish register");
     }
+    return 0;
 }
 
 void join(struct Buffer1* buffer1, struct Buffer2* buffer2, int tCurrentBufferPage1, int tCurrentBufferPage2, int tPagina){
@@ -263,10 +269,13 @@ void join(struct Buffer1* buffer1, struct Buffer2* buffer2, int tCurrentBufferPa
 
     int i = 0;
     int j = 0;
-    printf("\nJoin Tuplas");
+//    printf("\nJoin Tuplas");
     for(i = 0; i < tFactor / sizeof(struct Tupla1); i++){
+//       printf("\nLocked %d %s ", buffer1->paginas[tCurrentBufferPage1].tuplas[i].zipCode,buffer1->paginas[tCurrentBufferPage1].tuplas[i].city);
+
         for(j = 0; j < tFactor2 / sizeof(struct Tupla2); j++){
-            //printf("\n%d",buffer1->paginas[tCurrentBufferPage1].tuplas[i].id);
+//             printf("\nInterno %d %s ", buffer2->paginas[tCurrentBufferPage2].tuplas[j].zipCode,buffer2->paginas[tCurrentBufferPage2].tuplas[j].street);
+
             if(buffer1->paginas[tCurrentBufferPage1].tuplas[i].id == buffer2->paginas[tCurrentBufferPage2].tuplas[j].id){
                 printf("\n Match: %d %s %d %s ", buffer1->paginas[tCurrentBufferPage1].tuplas[i].id,buffer1->paginas[tCurrentBufferPage1].tuplas[i].city, buffer2->paginas[tCurrentBufferPage2].tuplas[j].id,buffer2->paginas[tCurrentBufferPage2].tuplas[j].street);
             }
@@ -275,36 +284,38 @@ void join(struct Buffer1* buffer1, struct Buffer2* buffer2, int tCurrentBufferPa
 
 }
 
-void readBlocking(struct Tupla1* bloco, FILE* file, int sizeToRead){
+int readBlocking(struct Tupla1* bloco, FILE* file, int sizeToRead){
 
 //    fread(&bloco, sizeof(struct Tupla1), sizeToRead / sizeof(struct Tupla1), file);
-    printf("\n Size To Read: %d", sizeToRead);
+//    printf("\n Size To Read: %d", sizeToRead);
 
 
     int i = 0;
 
     for ( i = 0; i < sizeToRead/sizeof(struct Tupla1); i++){
         if(fscanf(file, "%d %s %s %d %s %s %d %d", &bloco[i].id, (&bloco[i])->firstName, (&bloco[i])->lastName, &bloco[i].age, (&bloco[i])->city, (&bloco[i])->state, &bloco[i].zipCode, &bloco[i].idCity) == EOF){
-            break;
+            return -1;
         }
-        printf("\n%d %s %s %d %s %s %d %d", bloco[i].id, (&bloco[i])->firstName, (&bloco[i])->lastName, bloco[i].age, (&bloco[i])->city, (&bloco[i])->state, bloco[i].zipCode, bloco[i].idCity);
+        //printf("\n%d %s %s %d %s %s %d %d", bloco[i].id, (&bloco[i])->firstName, (&bloco[i])->lastName, bloco[i].age, (&bloco[i])->city, (&bloco[i])->state, bloco[i].zipCode, bloco[i].idCity);
     }
+    return 0;
 }
 
-void readBlocking2(struct Tupla2* bloco, FILE* file, int sizeToRead){
+int readBlocking2(struct Tupla2* bloco, FILE* file, int sizeToRead){
 
 //    fread(&bloco, sizeof(struct Tupla1), sizeToRead / sizeof(struct Tupla1), file);
-    printf("\n Size To Read: %d", sizeToRead);
+//    printf("\n Size To Read: %d", sizeToRead);
 
 
     int i = 0;
-    rewind(file);
+
     for ( i = 0; i < sizeToRead/sizeof(struct Tupla2); i++){
         if(fscanf(file, "%d %s %d", &bloco[i].id,&bloco[i].street, &bloco[i].zipCode) == EOF){
-            break;
+            return -1;
         }
-        printf("\n%d %s %d", bloco[i].id, &bloco[i].street, &bloco[i].zipCode);
+       // printf("\n%d %s %d", bloco[i].id, &bloco[i].street, &bloco[i].zipCode);
     }
+    return 0;
 }
 
 void clearBuffer (struct Buffer1* buffer, int pBufferSize){
